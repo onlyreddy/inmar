@@ -1,45 +1,74 @@
-import React, { useState, useEffect } from 'react';
+import Button from '@mui/material/Button';
+import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import EducationInformation from './EducationInformation';
 import PersonalInformation from './PersonalInformation';
-import WorkExperience from './WorkExperience';
-import Education from './Education';
 import Skills from './Skills';
+import WorkExperience from './WorkExperience';
+import { IFormData } from './types/IFormData';
+import { tss } from "tss-react/mui";
 
 const steps = ['Personal Information', 'Work Experience', 'Education', 'Skills'];
 
+const useStyles = tss
+    .create(({ theme }) => ({
+        root: {
+            display: 'flex',
+            flexDirection: 'column',
+            background: theme.palette.background.default,
+            color: theme.palette.text.primary,
+        },
+    }));
+
 const MultiStepForm: React.FC = () => {
-    const [currentStep, setCurrentStep] = useState<number>(0);
-    const [formData, setFormData] = useState({
+    const { classes } = useStyles();
+    const [currentStep, setCurrentStep] = useState<number>(2);
+    const [formData, setFormData] = useState<IFormData>({
         personalInformation: {
-            name: '',
+            firstName: '',
+            lastName: '',
             email: '',
             phoneNumber: '',
             languageKnown: '',
         },
-        workExperience: [],
-        education: [],
-        skills: [],
+        workExperience: {
+            companyName: '',
+            startDate: dayjs(new Date()) as unknown as string,
+            endDate: '',
+            role: ''
+        },
+        education: {
+            institutionName: '',
+            typeOfInstitution: '',
+            degree: '',
+            date: ''
+        },
+        skills: {
+            skills: '',
+            skillLevel: ''
+        },
     });
 
     useEffect(() => {
         // Handle logic for fetching and updating data if needed
     }, [currentStep]);
 
-    const handleNext = () => {
+    const handleNext = React.useCallback(() => {
         setCurrentStep((prevStep) => prevStep + 1);
-    };
+    }, []);
 
-    const handlePrevious = () => {
+    const handlePrevious = React.useCallback(() => {
         setCurrentStep((prevStep) => prevStep - 1);
-    };
+    }, []);
 
-    const handleFormDataChange = (stepData: any) => {
+    const handleFormDataChange = React.useCallback((stepData: IFormData) => {
         setFormData((prevData) => ({
             ...prevData,
             ...stepData,
         }));
-    };
+    }, []);
 
-    const renderStep = () => {
+    const renderStep = React.useMemo(() => {
         switch (currentStep) {
             case 0:
                 return (
@@ -57,17 +86,17 @@ const MultiStepForm: React.FC = () => {
                 );
             case 2:
                 return (
-                    <Education data={formData.education} onChange={handleFormDataChange} />
+                    <EducationInformation data={formData.education} onChange={handleFormDataChange} />
                 );
             case 3:
                 return <Skills data={formData.skills} onChange={handleFormDataChange} />;
             default:
                 return null;
         }
-    };
+    }, [currentStep, formData.education, formData.personalInformation, formData.skills, formData.workExperience, handleFormDataChange]);
 
     return (
-        <div>
+        <div className={classes.root}>
             <h1>Job Application Form</h1>
             <div>
                 <div>
@@ -77,13 +106,13 @@ const MultiStepForm: React.FC = () => {
                         </span>
                     ))}
                 </div>
-                {renderStep()}
+                {renderStep}
                 <div>
                     {currentStep > 0 && (
-                        <button onClick={handlePrevious}>Previous</button>
+                        <Button onClick={handlePrevious} variant="contained">Previous</Button>
                     )}
                     {currentStep < steps.length - 1 && (
-                        <button onClick={handleNext}>Next</button>
+                        <Button onClick={handleNext} variant="contained">Next</Button>
                     )}
                 </div>
             </div>
